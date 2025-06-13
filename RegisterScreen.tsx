@@ -59,7 +59,6 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
     try {
       console.log('Attempting to sign up with:', { email });
       
-      // First, try to register the user in Supabase auth
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -78,7 +77,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
         throw new Error('Не удалось создать пользователя');
       }
 
-      // Create user record in User table
+      
       const { error: insertError } = await supabase
         .from('User')
         .insert([
