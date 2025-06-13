@@ -19,7 +19,7 @@ import { supabase } from './SupabaseClient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 
-// Define screen dimensions for responsive design
+
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 interface ResidentialBuilding {
@@ -96,7 +96,7 @@ const HousesScreen: React.FC = () => {
 
   const fetchCompanies = async () => {
     try {
-      // Загружаем все компании
+      
       const { data: companiesData, error: companiesError } = await supabase
         .from('managementcompany')
         .select('*');
@@ -105,7 +105,7 @@ const HousesScreen: React.FC = () => {
         throw new Error(companiesError.message);
       }
 
-      // Загружаем все отзывы
+      
       const { data: reviewsData, error: reviewsError } = await supabase
         .from('review')
         .select('*');
@@ -114,7 +114,7 @@ const HousesScreen: React.FC = () => {
         throw new Error(reviewsError.message);
       }
 
-      // Вычисляем средний рейтинг для каждой компании
+      
       const companiesWithRating = companiesData.map((company) => {
         const companyReviews = reviewsData.filter(
           (review) => review.companyid === company.companyid
@@ -128,7 +128,7 @@ const HousesScreen: React.FC = () => {
 
         return {
           ...company,
-          rating: averageRating, // Добавляем средний рейтинг в объект компании
+          rating: averageRating, 
         };
       });
 
@@ -163,7 +163,7 @@ const HousesScreen: React.FC = () => {
       let location = await Location.getCurrentPositionAsync({});
       const { latitude, longitude } = location.coords;
 
-      // Получаем адрес по координатам
+      
       const response = await Location.reverseGeocodeAsync({
         latitude,
         longitude
@@ -311,7 +311,7 @@ const HousesScreen: React.FC = () => {
                 throw new Error(error.message);
               }
 
-              // Обновляем список домов
+              
               await fetchBuildings();
             } catch (error) {
               console.error('Error deleting building:', error);
