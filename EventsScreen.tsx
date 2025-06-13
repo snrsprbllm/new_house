@@ -9,7 +9,7 @@ import { WebView } from 'react-native-webview';
 import * as Notifications from 'expo-notifications';
 import { KeyboardAvoidingView, ScrollView } from 'react-native';
 
-// Define screen dimensions for responsive design
+
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 interface Event {
