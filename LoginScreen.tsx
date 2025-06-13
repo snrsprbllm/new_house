@@ -40,7 +40,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     try {
       setLoading(true);
       
-      // Проверяем соединение
+      
       console.log('Checking Supabase connection...');
       const { data: healthCheck, error: healthError } = await supabase.from('User').select('count').limit(1);
       
@@ -51,7 +51,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         throw new Error('Ошибка соединения с сервером');
       }
 
-      // Проверяем существование пользователя
+      
       const { data: userCheck, error: userCheckError } = await supabase
         .from('User')
         .select('*')
@@ -81,7 +81,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         throw new Error('Не удалось создать сессию');
       }
 
-      // Получаем профиль пользователя
+      
       console.log('Searching for user with ID:', data.session.user.id);
       const { data: profile, error: profileError } = await supabase
         .from('User')
@@ -101,7 +101,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         throw new Error('Пользователь не найден');
       }
 
-      // Сохраняем данные пользователя
+      
       await AsyncStorage.setItem('user', JSON.stringify(profile));
 
       navigation.replace('Home', { user: { email: profile.email } });
