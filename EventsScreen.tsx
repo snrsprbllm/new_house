@@ -309,7 +309,7 @@ const EventsScreen: React.FC = () => {
 
   const sendEventNotification = async (eventTitle: string) => {
     try {
-      // Get all users except the current user
+      
       const { data: users, error: usersError } = await supabase
         .from('User')
         .select('userid')
@@ -317,7 +317,7 @@ const EventsScreen: React.FC = () => {
 
       if (usersError) throw usersError;
 
-      // Create notifications for each user
+      
       const notifications = users?.map(user => ({
         userid: user.userid,
         type: 'new_event',
@@ -334,7 +334,7 @@ const EventsScreen: React.FC = () => {
         if (notificationError) throw notificationError;
       }
 
-      // Send push notification
+      
       await Notifications.scheduleNotificationAsync({
         content: {
           title: 'Новое событие',
@@ -350,7 +350,7 @@ const EventsScreen: React.FC = () => {
 
   const addEvent = async () => {
     try {
-      // Валидация ввода
+      
       if (!newEvent.eventname.trim()) {
         Alert.alert('Ошибка', 'Пожалуйста, введите название события');
         return;
@@ -368,7 +368,7 @@ const EventsScreen: React.FC = () => {
         return;
       }
 
-      // Format the date/time to ISO 8601 with timezone
+      
       const eventTime = newEvent.event_time;
       const formattedDateTime = eventTime.toISOString();
 
@@ -383,7 +383,7 @@ const EventsScreen: React.FC = () => {
         duration: newEvent.duration ? parseInt(newEvent.duration as any, 10) : null
       };
 
-      // Basic validation for duration
+      
       if (event.duration !== null && (isNaN(event.duration) || event.duration <= 0)) {
           Alert.alert('Ошибка', 'Пожалуйста, введите корректную длительность события в часах (целое положительное число).');
           return;
@@ -409,7 +409,7 @@ const EventsScreen: React.FC = () => {
       setShowAddForm(false);
       Alert.alert('Успех', 'Событие успешно добавлено!');
 
-      // Send notification for the new event
+      
       await sendEventNotification(event.eventname);
     } catch (error: any) {
       console.error('Error adding event:', error);
@@ -619,7 +619,7 @@ const EventsScreen: React.FC = () => {
   };
 
   const handleDislike = async (eventId: number, currentStatus: string | null) => {
-    // ... existing code ...
+   
   };
 
   const deleteEvent = async (eventId: number) => {
