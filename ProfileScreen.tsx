@@ -31,7 +31,7 @@ interface Building {
   address: string;
 }
 
-// Define screen dimensions for responsive design
+
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const profileSchema = Yup.object().shape({
@@ -74,7 +74,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     try {
       const user = JSON.parse(await AsyncStorage.getItem('user') || '{}');
       
-      // Prevent admin from changing avatar
+      
       if (user.user_id === 'admin') {
         Alert.alert('Информация', 'Аватар администратора не может быть изменен');
         return;
@@ -92,12 +92,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         const fileName = `${user.user_id}_${Date.now()}.${fileExt}`;
         const filePath = `avatars/${fileName}`;
 
-        // Convert image to base64
+        
         const base64 = await FileSystem.readAsStringAsync(result.assets[0].uri, {
           encoding: FileSystem.EncodingType.Base64,
         });
 
-        // Upload to Supabase Storage
+        
         const { data, error: uploadError } = await supabase.storage
           .from('kp02bucket')
           .upload(filePath, decode(base64), {
@@ -107,7 +107,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
         if (uploadError) throw uploadError;
 
-        // Get public URL
+        
         const { data: { publicUrl } } = supabase.storage
           .from('kp02bucket')
           .getPublicUrl(filePath);
@@ -128,7 +128,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         throw new Error('Данные пользователя отсутствуют');
       }
 
-      // Handle admin user
+     
       if (user.user_id === 'admin') {
         Alert.alert('Успешно', 'Профиль администратора не может быть изменен');
         return;
@@ -196,7 +196,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           return;
         }
 
-        // Handle admin user
+        
         if (user.user_id === 'admin') {
           setInitialValues({
             fullName: 'Администратор',
@@ -208,7 +208,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           return;
         }
 
-        // Получаем данные пользователя из Supabase
+        
         const { data, error } = await supabase
           .from('User')
           .select('fullname, age, gender, phone, avatarurl, building_id')
@@ -233,7 +233,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         });
 
         if (data.avatarurl) {
-          // If the avatar URL is a Supabase storage URL, get a signed URL
+          
           if (data.avatarurl.includes('supabase.co/storage/v1/object/public')) {
             const match = data.avatarurl.match(/public\/([^\/]+)\/(.+)/);
             if (match) {
@@ -255,7 +255,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           setUserEmail(user.email);
         }
 
-        // Получаем адрес здания, если есть building_id
+        
         if (data.building_id) {
           await fetchBuildingAddress(data.building_id);
         }
