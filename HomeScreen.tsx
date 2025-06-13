@@ -12,7 +12,7 @@ import { RootStackParamList, HomeScreenNavigationProp, HomeScreenRouteProp } fro
 import { RouteProp } from '@react-navigation/native';
 import { Platform } from 'react';
 
-// Определяем типы для параметров навигации
+
 export type HomeTabsParamList = {
   News: undefined;
   Houses: undefined;
@@ -28,14 +28,14 @@ type HomeScreenProps = {
 
 const Tab = createBottomTabNavigator<HomeTabsParamList>();
 
-// Обертка для создания градиентного фона
+
 const GradientWrapper = ({ children }: { children: React.ReactNode }) => (
   <LinearGradient colors={['#ee8181', '#FFFFFF']} style={{ flex: 1 }}>
     {children}
   </LinearGradient>
 );
 
-// Создаем обертку для каждого экрана
+
 const withGradient = <T extends keyof HomeTabsParamList>(
   Component: React.ComponentType<any>
 ) => {
@@ -46,7 +46,7 @@ const withGradient = <T extends keyof HomeTabsParamList>(
   );
 };
 
-// Типизированные компоненты экранов
+
 const GradientNewsScreen = withGradient<'News'>(NewsScreen);
 const GradientHousesScreen = withGradient<'Houses'>(HousesScreen);
 const GradientCompaniesScreen = withGradient<'Companies'>(CompaniesScreen);
