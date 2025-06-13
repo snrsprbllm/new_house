@@ -88,7 +88,7 @@ interface Event {
   eventname: string;
 }
 
-// Define screen dimensions for responsive design
+
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 interface NewsScreenProps {
@@ -127,7 +127,7 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [commentButtonDisabled, setCommentButtonDisabled] = useState(false);
 
-  // Add listener for screen dimension changes
+  
   useEffect(() => {
     const subscription = Dimensions.addEventListener('change', ({ window }) => {
       setDimensions({ window });
@@ -177,27 +177,27 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ navigation }) => {
           return { ...news, likes, dislikes, userLikeStatus };
         });
 
-        // Получаем signedUrl для картинок с повторными попытками
+        
         const newsWithImages = await Promise.all(
           newsWithCounts.map(async (news) => {
             if (news.imageurl) {
               try {
                 let filePath = news.imageurl;
-                // Если путь содержит полный URL, извлекаем только путь к файлу
+                
                 if (filePath.includes('supabase.co/storage/v1/object/public')) {
                   const match = filePath.match(/public\/([^\/]+)\/(.+)/);
                   if (match) {
                     filePath = match[2];
                   }
                 }
-                // Если путь содержит имя бакета, удаляем его
+                
                 if (filePath.includes('kp02bucket/')) {
                   filePath = filePath.split('kp02bucket/')[1];
                 }
                 
                 console.log('Getting signed URL for:', filePath);
                 
-                // Функция для получения signed URL с повторными попытками
+                
                 const getSignedUrlWithRetry = async (retries = 3, delay = 1000) => {
                   for (let i = 0; i < retries; i++) {
                     try {
@@ -229,7 +229,7 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ navigation }) => {
                 return { ...news, imageurl: signedUrl };
               } catch (error) {
                 console.error('Error processing image URL:', error);
-                // Возвращаем оригинальный URL в случае ошибки
+                
                 return news;
               }
             }
@@ -271,7 +271,7 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ navigation }) => {
     fetchCurrentUser();
     fetchEvents();
     requestMediaLibraryPermissions();
-    // Add call to delete expired events
+    
     const deleteExpiredEvents = async () => {
       try {
         await supabase.rpc('delete_expired_events');
@@ -318,7 +318,7 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ navigation }) => {
           data.map(async (image) => {
             if (image.imageurl) {
               console.log('Processing news image URL:', image.imageurl);
-              // Handle both full paths and just filenames
+              
               let filePath = image.imageurl;
               if (filePath.includes('kp02bucket/')) {
                 filePath = filePath.split('kp02bucket/')[1];
@@ -405,7 +405,7 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ navigation }) => {
       });
       console.log('File converted to base64');
 
-      // Функция для загрузки с повторными попытками
+      
       const uploadWithRetry = async (retries = 3, delay = 1000) => {
         for (let i = 0; i < retries; i++) {
           try {
@@ -425,7 +425,7 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ navigation }) => {
 
             console.log('Upload successful, data:', data);
             
-            // Проверяем, что файл действительно загружен
+            
             const { data: checkData, error: checkError } = await supabase.storage
               .from('kp02bucket')
               .download(filePath);
@@ -608,7 +608,7 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ navigation }) => {
             Alert.alert('Ошибка', 'Не удалось удалить оценку. Попробуйте позже.');
             return;
           }
-          // break intentionally omitted to allow insert
+          
         }
         default: {
           const { error: insertError } = await supabase.from('likedislike').insert([
@@ -693,7 +693,7 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ navigation }) => {
             Alert.alert('Ошибка', 'Не удалось удалить оценку. Попробуйте позже.');
             return;
           }
-          // break intentionally omitted to allow insert
+          
         }
         default: {
           const { error: insertError } = await supabase.from('likedislike').insert([
@@ -737,7 +737,7 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ navigation }) => {
           style: 'destructive',
           onPress: async () => {
             try {
-              // Сначала удаляем связанные комментарии
+              
               const { error: commentError } = await supabase
                 .from('comment')
                 .delete()
@@ -749,7 +749,7 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ navigation }) => {
                 return;
               }
 
-              // Затем удаляем связанные лайки/дизлайки
+              
               const { error: likeError } = await supabase
                 .from('likedislike')
                 .delete()
@@ -761,7 +761,7 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ navigation }) => {
                 return;
               }
 
-              // И наконец удаляем новость
+             
               const { error: newsError } = await supabase
                 .from('news')
                 .delete()
@@ -791,14 +791,14 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ navigation }) => {
 
   const checkImageExists = async (url: string): Promise<boolean> => {
     try {
-      // Если URL содержит путь к файлу в бакете
+     
       if (url.includes('kp02bucket')) {
-        // Извлекаем путь к файлу
+       
         const parts = url.split('kp02bucket/');
         if (parts.length > 1) {
           const filePath = parts[1];
           
-          // Проверяем наличие файла в бакете
+         
           const { data, error } = await supabase.storage
             .from('kp02bucket')
             .download(filePath);
@@ -812,7 +812,7 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ navigation }) => {
         }
       }
       
-      // Для других URL просто возвращаем true
+      
       return true;
     } catch (error) {
       console.error('Error checking if image exists:', error);
@@ -820,36 +820,34 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ navigation }) => {
     }
   };
 
-  // Функция для проверки и форматирования URL изображения
+ 
   const getImageUrl = async (url: string | null | undefined) => {
     if (!url) return null;
     
     console.log('Original URL:', url);
     
-    // Если это просто путь к файлу (без http/https), значит это путь в бакете
+    
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      // Проверяем, начинается ли путь с 'news/'
+     
       const filePath = url.startsWith('news/') ? url : `news/${url}`;
-      // Создаем подписанный URL с токеном доступа (действителен 1 час)
+     
       const { data, error } = await supabase.storage.from('kp02bucket').createSignedUrl(filePath, 3600);
       console.log('Created signed URL:', data?.signedUrl);
       return data?.signedUrl || null;
     }
     
-    // Если URL уже содержит токен, возвращаем его как есть
     if (url.includes('token=')) {
       return url;
     }
     
-    // Проверяем, является ли URL ссылкой на Supabase Storage
     if (url.includes('supabase.co/storage/v1/object/public')) {
-      // Извлекаем путь к файлу из URL
+ 
       const match = url.match(/public\/([^\/]+)\/(.+)/);
       if (match) {
         const bucket = match[1];
         const filePath = match[2];
         
-        // Формируем новый URL с использованием createSignedUrl
+        
         const { data, error } = await supabase.storage.from(bucket).createSignedUrl(filePath, 3600);
         console.log('Created signed URL from public URL:', data?.signedUrl);
         return data?.signedUrl || null;
@@ -880,7 +878,7 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ navigation }) => {
       if (userError) throw userError;
 
       if (userData?.avatarurl) {
-        // Если URL начинается с file://, значит это локальный файл
+        
         if (userData.avatarurl.startsWith('file://')) {
           setUserAvatars(prev => ({
             ...prev,
@@ -889,7 +887,7 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ navigation }) => {
           return;
         }
 
-        // Если это путь в бакете
+        
         if (!userData.avatarurl.startsWith('http')) {
           const { data: urlData, error: urlError } = await supabase.storage
             .from('kp02bucket')
@@ -904,7 +902,7 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ navigation }) => {
             }));
           }
         } else {
-          // Если это уже полный URL
+        
           setUserAvatars(prev => ({
             ...prev,
             [userId]: userData.avatarurl
@@ -961,7 +959,7 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ navigation }) => {
           [newsId]: data
         }));
 
-        // Загружаем аватары для всех комментариев
+        
         data.forEach(comment => {
           if (comment.user?.avatarurl) {
             fetchUserAvatar(comment.userid);
@@ -1004,7 +1002,7 @@ const NewsScreen: React.FC<NewsScreenProps> = ({ navigation }) => {
     console.log('Toggling comments for newsId:', newsId);
     setSelectedNewsId(newsId);
     setShowComments(true);
-    // Добавляем небольшую задержку перед загрузкой комментариев
+ 
     setTimeout(() => {
       fetchComments(newsId);
     }, 100);
