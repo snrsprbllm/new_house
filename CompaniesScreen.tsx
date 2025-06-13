@@ -17,7 +17,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from './SupabaseClient';
 import { Ionicons } from '@expo/vector-icons';
 
-// Define screen dimensions for responsive design
+
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface Company {
