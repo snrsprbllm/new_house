@@ -1024,13 +1024,24 @@ const EventsScreen: React.FC = () => {
                 )}
 
                 {showDatePicker && (
-                  <DateTimePicker
-                    value={newEvent.event_time}
-                    mode="datetime"
-                    display={Platform && Platform.OS === 'ios' ? 'spinner' : 'default'}
-                    onChange={handleDateChange}
-                    minimumDate={new Date()}
-                  />
+                  <View style={styles.datePickerContainer}>
+                    <DateTimePicker
+                      value={newEvent.event_time}
+                      mode="datetime"
+                      display={Platform && Platform.OS === 'ios' ? 'spinner' : 'default'}
+                      onChange={handleDateChange}
+                      minimumDate={new Date()}
+                      style={styles.datePicker}
+                      textColor="#333"
+                      accentColor="#ee8181"
+                    />
+                    <TouchableOpacity 
+                      style={styles.datePickerConfirmButton}
+                      onPress={() => setShowDatePicker(false)}
+                    >
+                      <Text style={styles.datePickerConfirmText}>Подтвердить</Text>
+                    </TouchableOpacity>
+                  </View>
                 )}
               </View>
             </ScrollView>
@@ -1043,6 +1054,7 @@ const EventsScreen: React.FC = () => {
   const renderEventItem = useCallback(({ item }: { item: Event }) => {
     let durationText = 'Не указана';
     let eventStatus = '';
+    
 
     let durationInHours: number | null = null;
 
@@ -1443,17 +1455,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    height: 40,
+    height: 50,
     backgroundColor: '#fff',
-    borderRadius: 5,
-    marginBottom: 10,
-    paddingHorizontal: 10,
+    borderRadius: 10,
+    marginBottom: 15,
+    paddingHorizontal: 15,
   },
   datePickerText: {
     color: '#333',
     textAlign: 'center',
     flex: 1,
     marginRight: 10,
+    fontSize: 16,
+    fontWeight: '600',
   },
   locationPickerButton: {
     flexDirection: 'row',
@@ -1552,6 +1566,38 @@ const styles = StyleSheet.create({
     width: SCREEN_WIDTH * 0.9,
     height: SCREEN_HEIGHT * 0.8,
     maxHeight: SCREEN_HEIGHT * 0.8,
+  },
+  datePickerContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    marginBottom: 15,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    alignItems: 'center',
+  },
+  datePicker: {
+    width: '100%',
+    height: 200,
+    backgroundColor: '#f8f8f8',
+    borderRadius: 8,
+    marginBottom: 10,
+    alignSelf: 'center',
+  },
+  datePickerConfirmButton: {
+    backgroundColor: '#ee8181',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  datePickerConfirmText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
 

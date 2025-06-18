@@ -480,6 +480,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 20,
+    paddingBottom: 100,
     width: '100%',
   },
   buildingItem: {
@@ -533,7 +534,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    top: Platform && Platform.OS === 'ios' ? 53 : 43,
   },
   modalContainer: {
     flex: 1,
@@ -555,6 +555,7 @@ const styles = StyleSheet.create({
   scrollContainer: {
     padding: 20,
     alignItems: 'center',
+    paddingBottom: 100,
   },
   modalImageSlider: {
     width: SCREEN_WIDTH * 0.92,
