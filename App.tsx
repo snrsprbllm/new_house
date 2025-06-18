@@ -66,7 +66,7 @@ const App = () => {
             const { data: profile, error: profileError } = await supabase
               .from('User')
               .select('*')
-              .eq('userid', user.id)
+              .eq('user_id', user.id)
               .single();
 
             if (profile && !profileError) {
@@ -75,6 +75,32 @@ const App = () => {
               setInitialRoute('Home');
             } else {
               console.log('App: Profile error', { profileError });
+              if (profileError?.code === 'PGRST116') {
+                console.log('App: Profile not found, creating new profile');
+                const { data: newProfile, error: createError } = await supabase
+                  .from('User')
+                  .insert([
+                    {
+                      user_id: user.id,
+                      email: user.email,
+                      fullname: '',
+                      age: null,
+                      gender: null,
+                      phone: null,
+                      avatarurl: null,
+                      building_id: null
+                    }
+                  ])
+                  .select()
+                  .single();
+
+                if (!createError && newProfile) {
+                  console.log('App: New profile created, saving to AsyncStorage');
+                  await AsyncStorage.setItem('user', JSON.stringify(newProfile));
+                  setInitialRoute('Home');
+                  return;
+                }
+              }
               setInitialRoute('Login');
             }
           } else {
@@ -103,15 +129,40 @@ const App = () => {
       if (event === 'SIGNED_IN' && session?.user) {
         console.log('App: User signed in, fetching profile');
         const { data: profile, error } = await supabase
-          .from('users')
+          .from('User')
           .select('*')
-          .eq('userid', session.user.id)
+          .eq('user_id', session.user.id)
           .single();
 
         if (profile && !error) {
           console.log('App: Profile found, saving to AsyncStorage');
           await AsyncStorage.setItem('user', JSON.stringify(profile));
           setInitialRoute('Home');
+        } else if (error?.code === 'PGRST116') {
+          // Create profile if it doesn't exist
+          console.log('App: Profile not found, creating new profile');
+          const { data: newProfile, error: createError } = await supabase
+            .from('User')
+            .insert([
+              {
+                user_id: session.user.id,
+                email: session.user.email,
+                fullname: '',
+                age: null,
+                gender: null,
+                phone: null,
+                avatarurl: null,
+                building_id: null
+              }
+            ])
+            .select()
+            .single();
+
+          if (!createError && newProfile) {
+            console.log('App: New profile created, saving to AsyncStorage');
+            await AsyncStorage.setItem('user', JSON.stringify(newProfile));
+            setInitialRoute('Home');
+          }
         }
       } else if (event === 'SIGNED_OUT') {
         console.log('App: User signed out');

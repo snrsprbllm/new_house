@@ -78,13 +78,13 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
         throw new Error('Не удалось создать пользователя');
       }
 
-      // Create user record in User table
+      // Create user record in User table with the auth user ID
       const { error: insertError } = await supabase
         .from('User')
         .insert([
           {
+            user_id: data.user.id, // Use the auth user ID
             email: email as string,
-            userid: data.user.id,
             fullname: '',
             age: null,
             gender: null,
@@ -99,6 +99,21 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
         throw new Error('Не удалось создать запись пользователя');
       }
 
+      // Get the created profile to save to AsyncStorage
+      const { data: profile, error: profileError } = await supabase
+        .from('User')
+        .select('*')
+        .eq('user_id', data.user.id)
+        .single();
+
+      if (profileError || !profile) {
+        console.error('Error fetching created profile:', profileError);
+        throw new Error('Не удалось получить профиль пользователя');
+      }
+
+      // Save user data to AsyncStorage
+      await AsyncStorage.setItem('user', JSON.stringify(profile));
+
       navigation.replace('Home', { user: { email: data.user.email || email } });
     } catch (error: any) {
       console.error('Registration error:', error);
@@ -111,7 +126,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
   return (
     <LinearGradient colors={['#ee8181', '#FFFFFF']} style={styles.container}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform && Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
         <ScrollView

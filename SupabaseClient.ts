@@ -1,14 +1,15 @@
 import { createClient } from '@supabase/supabase-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import 'react-native-url-polyfill/auto';
-import { Platform } from 'react-native';
 
 const supabaseUrl = 'https://wcowzzqmgesbzwkfjlst.supabase.co';
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indjb3d6enFtZ2VzYnp3a2ZqbHN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5OTM5MjgsImV4cCI6MjA1NjU2OTkyOH0.qzusb-tKMPKB8wqaX68LlHOWTRbE370hMpng1sPqWyE';
 
-// Проверяем, что все необходимые полифилы загружены
-if (Platform.OS === 'android') {
+// Загружаем полифил для Android
+try {
   require('react-native-get-random-values');
+} catch (error) {
+  console.log('react-native-get-random-values not available');
 }
 
 console.log('Initializing Supabase client...');

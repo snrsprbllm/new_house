@@ -77,28 +77,32 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ route }) => {
         headerShown: false,
         tabBarActiveTintColor: '#ee8181',
         tabBarInactiveTintColor: '#666',
-        tabBarStyle: {
+        tabBar: {
+          height: Platform && Platform.OS === 'android' ? 70 : 85,
+          paddingBottom: Platform && Platform.OS === 'android' ? 0 : 0,
           backgroundColor: '#fff',
           borderTopWidth: 1,
-          borderTopColor: '#eee',
-          height: Platform.OS === 'android' ? 70 : 85,
-          paddingBottom: Platform.OS === 'android' ? 0 : 0,
-          elevation: 0,
-          shadowOpacity: 0,
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
+          borderTopColor: '#e0e0e0',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+          elevation: 8,
         },
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '500',
-          marginTop: 0,
-          marginBottom: Platform.OS === 'android' ? 0 : 0,
+        tabBarItem: {
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginBottom: Platform && Platform.OS === 'android' ? 0 : 0,
+        },
+        tabBarLabel: {
+          fontSize: 12,
+          marginTop: 4,
+          marginBottom: Platform && Platform.OS === 'android' ? 0 : 0,
         },
         tabBarIconStyle: {
           marginTop: 0,
-          marginBottom: Platform.OS === 'android' ? 0 : 0,
+          marginBottom: Platform && Platform.OS === 'android' ? 0 : 0,
         },
       })}
     >

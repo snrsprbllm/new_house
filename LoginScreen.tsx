@@ -51,15 +51,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         throw new Error('Ошибка соединения с сервером');
       }
 
-      // Проверяем существование пользователя
-      const { data: userCheck, error: userCheckError } = await supabase
-        .from('User')
-        .select('*')
-        .eq('email', email)
-        .single();
-
-      console.log('User check:', { userCheck, userCheckError });
-
       console.log('Attempting login with:', { email });
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -93,6 +84,36 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
       if (profileError) {
         console.error('Profile error details:', profileError);
+        // If profile doesn't exist, create it
+        if (profileError.code === 'PGRST116') {
+          console.log('Profile not found, creating new profile');
+          const { data: newProfile, error: createError } = await supabase
+            .from('User')
+            .insert([
+              {
+                user_id: data.session.user.id,
+                email: data.session.user.email,
+                fullname: '',
+                age: null,
+                gender: null,
+                phone: null,
+                avatarurl: null,
+                building_id: null
+              }
+            ])
+            .select()
+            .single();
+
+          if (createError || !newProfile) {
+            console.error('Error creating profile:', createError);
+            throw new Error('Не удалось создать профиль пользователя');
+          }
+
+          // Сохраняем данные пользователя
+          await AsyncStorage.setItem('user', JSON.stringify(newProfile));
+          navigation.replace('Home', { user: { email: newProfile.email } });
+          return;
+        }
         throw new Error('Ошибка получения профиля');
       }
 
@@ -116,7 +137,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   return (
     <LinearGradient colors={['#ee8181', '#FFFFFF']} style={styles.container}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform && Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
         <ScrollView

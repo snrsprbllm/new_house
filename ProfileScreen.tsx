@@ -217,47 +217,78 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
         if (error) {
           console.error('Supabase error:', error);
-          throw new Error(error.message);
-        }
+          // If profile doesn't exist, create it
+          if (error.code === 'PGRST116') {
+            console.log('Profile not found, creating new profile');
+            const { data: newProfile, error: createError } = await supabase
+              .from('User')
+              .insert([
+                {
+                  user_id: user.user_id,
+                  email: user.email,
+                  fullname: '',
+                  age: null,
+                  gender: null,
+                  phone: null,
+                  avatarurl: null,
+                  building_id: null
+                }
+              ])
+              .select()
+              .single();
 
-        if (!data) {
-          console.error('No user data found in Supabase');
-          throw new Error('Данные пользователя не найдены в базе данных');
-        }
-
-        setInitialValues({
-          fullName: data.fullname || '',
-          age: data.age ? data.age.toString() : '',
-          phone: data.phone || '',
-          gender: data.gender || '',
-        });
-
-        if (data.avatarurl) {
-          // If the avatar URL is a Supabase storage URL, get a signed URL
-          if (data.avatarurl.includes('supabase.co/storage/v1/object/public')) {
-            const match = data.avatarurl.match(/public\/([^\/]+)\/(.+)/);
-            if (match) {
-              const bucket = match[1];
-              const filePath = match[2];
-              const { data: signedUrlData } = await supabase.storage
-                .from(bucket)
-                .createSignedUrl(filePath, 3600);
-              if (signedUrlData?.signedUrl) {
-                setAvatar(signedUrlData.signedUrl);
-              }
+            if (createError || !newProfile) {
+              console.error('Error creating profile:', createError);
+              throw new Error('Не удалось создать профиль пользователя');
             }
+
+            // Update AsyncStorage with new profile
+            await AsyncStorage.setItem('user', JSON.stringify(newProfile));
+            
+            setInitialValues({
+              fullName: '',
+              age: '',
+              phone: '',
+              gender: '',
+            });
           } else {
-            setAvatar(data.avatarurl);
+            throw new Error(error.message);
+          }
+        } else if (data) {
+          setInitialValues({
+            fullName: data.fullname || '',
+            age: data.age ? data.age.toString() : '',
+            phone: data.phone || '',
+            gender: data.gender || '',
+          });
+
+          if (data.avatarurl) {
+            // If the avatar URL is a Supabase storage URL, get a signed URL
+            if (data.avatarurl.includes('supabase.co/storage/v1/object/public')) {
+              const match = data.avatarurl.match(/public\/([^\/]+)\/(.+)/);
+              if (match) {
+                const bucket = match[1];
+                const filePath = match[2];
+                const { data: signedUrlData } = await supabase.storage
+                  .from(bucket)
+                  .createSignedUrl(filePath, 3600);
+                if (signedUrlData?.signedUrl) {
+                  setAvatar(signedUrlData.signedUrl);
+                }
+              }
+            } else {
+              setAvatar(data.avatarurl);
+            }
+          }
+
+          // Получаем адрес здания, если есть building_id
+          if (data.building_id) {
+            await fetchBuildingAddress(data.building_id);
           }
         }
 
         if (user.email) {
           setUserEmail(user.email);
-        }
-
-        // Получаем адрес здания, если есть building_id
-        if (data.building_id) {
-          await fetchBuildingAddress(data.building_id);
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -271,7 +302,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   return (
     <LinearGradient colors={['#ee8181', '#FFFFFF']} style={styles.container}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform && Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}
       >
         <View style={styles.header}>
@@ -407,8 +438,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 50 : 45,
-    height: Platform.OS === 'ios' ? 90 : 85,
+    paddingTop: Platform && Platform.OS === 'ios' ? 50 : 45,
+    height: Platform && Platform.OS === 'ios' ? 90 : 85,
   },
   headerTitle: {
     fontSize: SCREEN_WIDTH * 0.06,

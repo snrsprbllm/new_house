@@ -18,6 +18,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from './SupabaseClient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
+import * as ImagePicker from 'expo-image-picker';
 
 // Define screen dimensions for responsive design
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -257,7 +258,7 @@ const HousesScreen: React.FC = () => {
   const openMap = (address: string) => {
     const query = encodeURIComponent(address);
     let url = '';
-    if (Platform.OS === 'ios') {
+    if (Platform && Platform.OS === 'ios') {
       url = `http://maps.apple.com/?q=${query}`;
     } else {
       url = `geo:0,0?q=${query}`;
@@ -321,6 +322,21 @@ const HousesScreen: React.FC = () => {
         },
       ],
     );
+  };
+
+  const handleImagePicker = async () => {
+    try {
+      if (Platform && Platform.OS === 'ios') {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert('Ошибка', 'Нужно разрешение для доступа к галерее');
+          return;
+        }
+      }
+    } catch (error) {
+      console.error('Error handling image picker:', error);
+      Alert.alert('Error', (error as Error).message || 'Unknown error');
+    }
   };
 
   const renderModal = () => (
@@ -450,8 +466,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 50 : 45,
-    height: Platform.OS === 'ios' ? 90 : 85,
+    paddingTop: Platform && Platform.OS === 'ios' ? 50 : 45,
+    height: Platform && Platform.OS === 'ios' ? 90 : 85,
   },
   headerTitle: {
     fontSize: SCREEN_WIDTH * 0.06,
@@ -515,18 +531,21 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    top: Platform && Platform.OS === 'ios' ? 53 : 43,
   },
   modalContainer: {
     flex: 1,
     backgroundColor: '#fff',
-    marginTop: Platform.OS === 'ios' ? 50 : 40,
+    marginTop: Platform && Platform.OS === 'ios' ? 50 : 40,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     overflow: 'hidden',
   },
   closeButton: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 53 : 43,
+    top: Platform && Platform.OS === 'ios' ? 53 : 43,
     right: 20,
     zIndex: 999,
     backgroundColor: 'rgba(255, 255, 255, 0.8)',
@@ -696,6 +715,28 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
+  },
+  floatingButton: {
+    position: 'absolute',
+    right: 20,
+    bottom: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#ee8181',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    marginTop: Platform && Platform.OS === 'ios' ? 50 : 40,
+  },
+  floatingButtonText: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: 'bold',
   },
 });
 

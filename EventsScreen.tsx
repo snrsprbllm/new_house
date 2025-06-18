@@ -595,9 +595,9 @@ const EventsScreen: React.FC = () => {
   };
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
-    setShowDatePicker(Platform.OS === 'ios');
+    setShowDatePicker(Platform && Platform.OS === 'ios');
     if (selectedDate) {
-      setNewEvent({ ...newEvent, event_time: selectedDate });
+      setNewEvent(prev => ({ ...prev, event_time: selectedDate }));
     }
   };
 
@@ -863,155 +863,167 @@ const EventsScreen: React.FC = () => {
   );
 
   const renderAddForm = () => (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.keyboardAvoidingView}
+    <Modal
+      visible={showAddForm}
+      animationType="slide"
+      transparent={true}
+      onRequestClose={() => setShowAddForm(false)}
     >
-      <ScrollView contentContainerStyle={styles.formScrollView}>
-        <View style={styles.formContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Название события"
-            value={newEvent.eventname}
-            onChangeText={(text) => setNewEvent({ ...newEvent, eventname: text })}
-            textAlign="center"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Описание"
-            value={newEvent.description}
-            onChangeText={(text) => setNewEvent({ ...newEvent, description: text })}
-            textAlign="center"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Длительность (часы)"
-            value={newEvent.duration}
-            onChangeText={(text) => setNewEvent({ ...newEvent, duration: text as any })}
-            keyboardType="numeric"
-            textAlign="center"
-          />
-          <TouchableOpacity 
-            style={styles.datePickerButton}
-            onPress={() => setShowDatePicker(true)}
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <KeyboardAvoidingView
+            behavior={Platform && Platform.OS === "ios" ? "padding" : "height"}
+            style={{ flex: 1 }}
+            keyboardVerticalOffset={Platform && Platform.OS === 'ios' ? 64 : 0}
           >
-            <Text style={styles.datePickerText}>Дата: {newEvent.event_time.toLocaleDateString()}</Text>
-            <Ionicons name="calendar" size={24} color="#666" />
-          </TouchableOpacity>
+            <ScrollView contentContainerStyle={styles.formScrollView}>
+              <View style={styles.formContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Название события"
+                  value={newEvent.eventname}
+                  onChangeText={(text) => setNewEvent({ ...newEvent, eventname: text })}
+                  textAlign="center"
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Описание"
+                  value={newEvent.description}
+                  onChangeText={(text) => setNewEvent({ ...newEvent, description: text })}
+                  textAlign="center"
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Длительность (часы)"
+                  value={newEvent.duration}
+                  onChangeText={(text) => setNewEvent({ ...newEvent, duration: text as any })}
+                  keyboardType="numeric"
+                  textAlign="center"
+                />
+                <TouchableOpacity 
+                  style={styles.datePickerButton}
+                  onPress={() => setShowDatePicker(true)}
+                >
+                  <Text style={styles.datePickerText}>Дата: {newEvent.event_time.toLocaleDateString()}</Text>
+                  <Ionicons name="calendar" size={24} color="#666" />
+                </TouchableOpacity>
 
-          {!showLocationPicker && (
-            <TouchableOpacity 
-              style={styles.locationPickerButton}
-              onPress={() => setShowLocationPicker(true)}
-            >
-              <Text style={styles.locationPickerText}>
-                {newEvent.location || "Выберите место на карте"}
-              </Text>
-              <Ionicons name="location" size={24} color="#666" />
-            </TouchableOpacity>
-          )}
+                {!showLocationPicker && (
+                  <TouchableOpacity 
+                    style={styles.locationPickerButton}
+                    onPress={() => setShowLocationPicker(true)}
+                  >
+                    <Text style={styles.locationPickerText}>
+                      {newEvent.location || "Выберите место на карте"}
+                    </Text>
+                    <Ionicons name="location" size={24} color="#666" />
+                  </TouchableOpacity>
+                )}
 
-          {showLocationPicker && (
-            <View style={styles.mapContainerForSelection}>
-              <WebView
-                source={{
-                  html: `
-                    <!DOCTYPE html>
-                    <html>
-                      <head>
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-                        <script src="https://api-maps.yandex.ru/2.1/?apikey=f3f88826-ab92-499b-bdc5-0382ee4759b0&lang=ru_RU" type="text/javascript"></script>
-                        <style>
-                          html, body, #map {
-                            width: 100%;
-                            height: 100%;
-                            margin: 0;
-                            padding: 0;
+                {showLocationPicker && (
+                  <View style={styles.mapContainerForSelection}>
+                    <WebView
+                      source={{
+                        html: `
+                          <!DOCTYPE html>
+                          <html>
+                            <head>
+                              <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+                              <script src="https://api-maps.yandex.ru/2.1/?apikey=f3f88826-ab92-499b-bdc5-0382ee4759b0&lang=ru_RU" type="text/javascript"></script>
+                              <style>
+                                html, body, #map {
+                                  width: 100%;
+                                  height: 100%;
+                                  margin: 0;
+                                  padding: 0;
+                                }
+                              </style>
+                            </head>
+                            <body>
+                              <div id="map"></div>
+                              <script>
+                                ymaps.ready(function() {
+                                  const map = new ymaps.Map('map', {
+                                    center: [${selectedLocation.latitude}, ${selectedLocation.longitude}],
+                                    zoom: 12,
+                                    controls: ['zoomControl', 'fullscreenControl']
+                                  });
+
+                                  ${selectedLocation.latitude !== 55.7558 || selectedLocation.longitude !== 37.6173 ? `
+                                    const placemark = new ymaps.Placemark([${selectedLocation.latitude}, ${selectedLocation.longitude}], {
+                                      balloonContent: 'Выбранное место'
+                                    }, {
+                                      preset: 'islands#redDotIcon'
+                                    });
+                                    map.geoObjects.add(placemark);
+                                  ` : ''}
+
+                                  map.events.add('click', function(e) {
+                                    const coords = e.get('coords');
+                                    window.ReactNativeWebView.postMessage(JSON.stringify({ 
+                                      type: 'location', 
+                                      lat: coords[0], 
+                                      lng: coords[1] 
+                                    }));
+                                  });
+                                });
+                              </script>
+                            </body>
+                          </html>
+                        `
+                      }}
+                      style={styles.mapInsideForm}
+                      javaScriptEnabled={true}
+                      domStorageEnabled={true}
+                      startInLoadingState={true}
+                      scalesPageToFit={true}
+                      scrollEnabled={false}
+                      bounces={false}
+                      onMessage={(event) => {
+                        try {
+                          const data = JSON.parse(event.nativeEvent.data);
+                          if (data.type === 'location') {
+                            setSelectedLocation({ latitude: data.lat, longitude: data.lng });
+                            setNewEvent({ 
+                              ...newEvent, 
+                              location: `${data.lat.toFixed(6)}, ${data.lng.toFixed(6)}` 
+                            });
                           }
-                        </style>
-                      </head>
-                      <body>
-                        <div id="map"></div>
-                        <script>
-                          ymaps.ready(function() {
-                            const map = new ymaps.Map('map', {
-                              center: [${selectedLocation.latitude}, ${selectedLocation.longitude}],
-                              zoom: 12,
-                              controls: ['zoomControl', 'fullscreenControl']
-                            });
+                        } catch (error) {
+                          console.error('Error parsing message from WebView:', error);
+                        }
+                      }}
+                    />
+                    <TouchableOpacity 
+                      style={styles.confirmLocationButton}
+                      onPress={() => setShowLocationPicker(false)}
+                    >
+                      <Text style={styles.confirmLocationText}>Подтвердить место</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
 
-                            ${selectedLocation.latitude !== 55.7558 || selectedLocation.longitude !== 37.6173 ? `
-                              const placemark = new ymaps.Placemark([${selectedLocation.latitude}, ${selectedLocation.longitude}], {
-                                balloonContent: 'Выбранное место'
-                              }, {
-                                preset: 'islands#redDotIcon'
-                              });
-                              map.geoObjects.add(placemark);
-                            ` : ''}
+                {!showLocationPicker && (
+                  <TouchableOpacity style={styles.submitButton} onPress={addEvent}>
+                    <Text style={styles.submitButtonText}>Добавить событие</Text>
+                  </TouchableOpacity>
+                )}
 
-                            map.events.add('click', function(e) {
-                              const coords = e.get('coords');
-                              window.ReactNativeWebView.postMessage(JSON.stringify({ 
-                                type: 'location', 
-                                lat: coords[0], 
-                                lng: coords[1] 
-                              }));
-                            });
-                          });
-                        </script>
-                      </body>
-                    </html>
-                  `
-                }}
-                style={styles.mapInsideForm}
-                javaScriptEnabled={true}
-                domStorageEnabled={true}
-                startInLoadingState={true}
-                scalesPageToFit={true}
-                scrollEnabled={false}
-                bounces={false}
-                onMessage={(event) => {
-                  try {
-                    const data = JSON.parse(event.nativeEvent.data);
-                    if (data.type === 'location') {
-                      setSelectedLocation({ latitude: data.lat, longitude: data.lng });
-                      setNewEvent({ 
-                        ...newEvent, 
-                        location: `${data.lat.toFixed(6)}, ${data.lng.toFixed(6)}` 
-                      });
-                    }
-                  } catch (error) {
-                    console.error('Error parsing message from WebView:', error);
-                  }
-                }}
-              />
-              <TouchableOpacity 
-                style={styles.confirmLocationButton}
-                onPress={() => setShowLocationPicker(false)}
-              >
-                <Text style={styles.confirmLocationText}>Подтвердить место</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          {!showLocationPicker && (
-            <TouchableOpacity style={styles.submitButton} onPress={addEvent}>
-              <Text style={styles.submitButtonText}>Добавить событие</Text>
-            </TouchableOpacity>
-          )}
-
-          {showDatePicker && (
-            <DateTimePicker
-              value={newEvent.event_time}
-              mode="datetime"
-              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-              onChange={handleDateChange}
-              minimumDate={new Date()}
-            />
-          )}
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={newEvent.event_time}
+                    mode="datetime"
+                    display={Platform && Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    onChange={handleDateChange}
+                    minimumDate={new Date()}
+                  />
+                )}
+              </View>
+            </ScrollView>
+          </KeyboardAvoidingView>
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      </View>
+    </Modal>
   );
 
   const renderEventItem = useCallback(({ item }: { item: Event }) => {
@@ -1276,8 +1288,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'ios' ? 50 : 45,
-    height: Platform.OS === 'ios' ? 90 : 85,
+    paddingTop: Platform && Platform.OS === 'ios' ? 50 : 45,
+    height: Platform && Platform.OS === 'ios' ? 90 : 85,
   },
   headerTitle: {
     fontSize: SCREEN_WIDTH * 0.06,
@@ -1390,7 +1402,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 15,
-    paddingTop: Platform.OS === 'ios' ? 50 : 20,
+    paddingTop: Platform && Platform.OS === 'ios' ? 50 : 20,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
@@ -1507,6 +1519,28 @@ const styles = StyleSheet.create({
   eventStatusActive: {
     color: 'green',
     fontWeight: 'bold',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    margin: 20,
+    borderRadius: 20,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    maxHeight: '80%',
+    paddingTop: Platform && Platform.OS === 'ios' ? 50 : 20,
   },
 });
 
