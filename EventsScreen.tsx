@@ -871,12 +871,23 @@ const EventsScreen: React.FC = () => {
     >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Добавить событие</Text>
+            <TouchableOpacity onPress={() => setShowAddForm(false)} style={styles.closeButton}>
+              <Ionicons name="close-circle" size={30} color="#ee8181" />
+            </TouchableOpacity>
+          </View>
+          
           <KeyboardAvoidingView
             behavior={Platform && Platform.OS === "ios" ? "padding" : "height"}
-            style={{ flex: 1 }}
+            style={styles.keyboardAvoidingView}
             keyboardVerticalOffset={Platform && Platform.OS === 'ios' ? 64 : 0}
           >
-            <ScrollView contentContainerStyle={styles.formScrollView}>
+            <ScrollView 
+              style={styles.formScrollView}
+              contentContainerStyle={styles.formScrollContent}
+              showsVerticalScrollIndicator={false}
+            >
               <View style={styles.formContainer}>
                 <TextInput
                   style={styles.input}
@@ -884,6 +895,7 @@ const EventsScreen: React.FC = () => {
                   value={newEvent.eventname}
                   onChangeText={(text) => setNewEvent({ ...newEvent, eventname: text })}
                   textAlign="center"
+                  placeholderTextColor="#333"
                 />
                 <TextInput
                   style={styles.input}
@@ -891,6 +903,7 @@ const EventsScreen: React.FC = () => {
                   value={newEvent.description}
                   onChangeText={(text) => setNewEvent({ ...newEvent, description: text })}
                   textAlign="center"
+                  placeholderTextColor="#333"
                 />
                 <TextInput
                   style={styles.input}
@@ -899,6 +912,7 @@ const EventsScreen: React.FC = () => {
                   onChangeText={(text) => setNewEvent({ ...newEvent, duration: text as any })}
                   keyboardType="numeric"
                   textAlign="center"
+                  placeholderTextColor="#333"
                 />
                 <TouchableOpacity 
                   style={styles.datePickerButton}
@@ -1318,10 +1332,7 @@ const styles = StyleSheet.create({
     borderColor: '#ee8181',
   },
   formContainer: {
-    padding: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    margin: 10,
-    borderRadius: 10,
+    flex: 1,
   },
   input: {
     height: 60,
@@ -1330,6 +1341,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingHorizontal: 10,
     textAlign: 'center',
+    color: '#333',
   },
   submitButton: {
     backgroundColor: '#ee8181',
@@ -1369,7 +1381,7 @@ const styles = StyleSheet.create({
   eventDetails: {
     fontSize: SCREEN_WIDTH * 0.035,
     fontWeight: 'bold',
-    color: '#666',
+    color: '#333',
     marginBottom: 3,
   },
   eventDescription: {
@@ -1401,18 +1413,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 15,
-    paddingTop: Platform && Platform.OS === 'ios' ? 50 : 20,
-    backgroundColor: '#fff',
+    paddingBottom: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderBottomColor: '#eee',
+    marginBottom: 15,
   },
   modalTitle: {
     fontSize: SCREEN_WIDTH * 0.055,
     fontWeight: 'bold',
     color: '#ee8181',
-    textAlign: 'center',
-    marginBottom: 10,
   },
   closeButton: {
     padding: 5,
@@ -1475,14 +1484,14 @@ const styles = StyleSheet.create({
   modalText: {
     fontSize: SCREEN_WIDTH * 0.04,
     fontWeight: 'bold',
-    color: '#666',
+    color: '#333',
     marginBottom: 5,
     textAlign: 'center',
   },
   emptyList: {
     fontSize: SCREEN_WIDTH * 0.045,
     fontWeight: 'bold',
-    color: '#666',
+    color: '#333',
     textAlign: 'center',
   },
   buttonText: {
@@ -1493,17 +1502,16 @@ const styles = StyleSheet.create({
   placeholderText: {
     fontSize: SCREEN_WIDTH * 0.04,
     fontWeight: 'bold',
-    color: '#666',
+    color: '#333',
     textAlign: 'center',
     marginTop: 20,
   },
   mapContainerForSelection: {
-    height: SCREEN_HEIGHT * 0.5,
+    height: 350,
     width: '100%',
     borderRadius: 10,
     overflow: 'hidden',
     marginBottom: 10,
-    position: 'relative',
   },
   mapInsideForm: {
     width: '100%',
@@ -1513,8 +1521,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   formScrollView: {
+    flex: 1,
+  },
+  formScrollContent: {
     flexGrow: 1,
-    justifyContent: 'center',
+    paddingBottom: 20,
   },
   eventStatusActive: {
     color: 'green',
@@ -1528,7 +1539,6 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: '#fff',
-    margin: 20,
     borderRadius: 20,
     padding: 20,
     shadowColor: '#000',
@@ -1539,8 +1549,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
-    maxHeight: '80%',
-    paddingTop: Platform && Platform.OS === 'ios' ? 50 : 20,
+    width: SCREEN_WIDTH * 0.9,
+    height: SCREEN_HEIGHT * 0.8,
+    maxHeight: SCREEN_HEIGHT * 0.8,
   },
 });
 
